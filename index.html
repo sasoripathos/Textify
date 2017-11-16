@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<head>
+    <meta charset="utf-8">
+    <title id="title">PureCloud Textify</title>
+    <link rel="stylesheet" type="text/css" href="WebStyle.css">
+</head>
+
+<body>
+<form id="chatForm">
+    <br/><br/><br/><br/>
+    <div class="col-md-1"> </div>
+<div class=" panel panel-default row col-md-3">
+    <div class="panel-heading">
+        User information
+    </div>
+    <br/>
+    <div class="panel-body"> 
+        <form>
+      <div class="input-group">
+        <label for="">First Name:</label>
+        <input class="form-control" type="text" id="firstName" value="John"/>
+      </div>
+      <br/>
+      <div class="input-group">
+        <label for="pwd">Last Name:</label>
+        <input  class="form-control" type="text" id="lastName" value="Doe"/>
+      </div>
+      <br/>
+      <div  class="input-group">
+        <label>Email ID:</label>
+        <input  class="form-control" type="text" id="agentEmail" value="John.Doe@example.com">
+      </div>
+        <br/>
+      <div>
+        <button class="col-md-5 btn btn-primary"  type="button" id="start" onclick="startEmbeddedChat()">Window Chat</button>
+      </div>
+
+    </form>
+    </div>
+</div>
+     <div class="col-md-1"> </div>
+    <div class="col-md-7">
+        <img src="https://www.underconsideration.com/brandnew/archives/genesys_monogram_detail.png" style="width:20%;height:20%">
+        <p style="font-size: 60px">Textify</p>
+    </div>
+</form>
+
+
+    
+    <button type="button" id="Record" hidden="true">Record</button>
+    <!-- the api items -->
+    <input id="key" type="text" size="40" value="4d7a7bba7e6944028d26db96bf51b0db" hidden="true">
+    <input id="languageOptions" value="en-US"  hidden="true">
+    <input id="recognitionMode" value="Interactive"  hidden="true">
+    <input id="formatOptions" value="Simple"  hidden="true">
+    <input id="inputSource" value="Mic"  hidden="true">
+    <textarea type="textarea" id="phraseDiv" style="display: none;"> </textarea>
+
+
+<div id="chatContainer" style="height:450px"></div>
+
+<script src="https://apps.mypurecloud.com/webchat/jsapi-v1.js" type="text/javascript"></script>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+<!-- The SDK has a dependency on requirejs (http://requirejs.org/). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js"></script>
+<!-- SDK location -->
+<script src="./speech.browser.sdk.js"></script>
+
+<script type="text/javascript">
+
+    var chatConfig = {};
+    function createChatConfig(){
+        var firstName = document.getElementById('firstName').value;
+        var lastName = document.getElementById('lastName').value;
+        var agentEmail = document.getElementById('agentEmail').value;
+
+        chatConfig = {
+            // Web chat application URL
+            "webchatAppUrl": "https://apps.mypurecloud.com/webchat",
+
+            // Web chat service URL
+            "webchatServiceUrl": "https://realtime.mypurecloud.com:443",
+
+            // Numeric organization ID
+            "orgId": 2,
+
+            // Organization name
+            "orgName": "inin",
+
+            // Requested agent language skill (Agent must have this language skill to receive chat)
+            "language": "English - Written",
+
+            // Requested agent skills (Agent must have these skills to receive chat)
+            "skills": ["Computers", "Printers"],
+            // OR
+            //"skills": [],
+
+            // Priority
+            "priority": 0,
+
+            // Queue Name
+            "queueName" : "Support",
+
+            // Target agent email (OPTIONAL)
+            "agentEmail": agentEmail,
+
+            // Log level
+            "logLevel": "DEBUG",
+
+            // Locale code
+            "locale": "en",
+
+            // Data that will be included with interaction
+            "data": {
+                "firstName": firstName,
+                "lastName": lastName,
+                "addressStreet": "64472 Brown Street",
+                "addressCity": "Lindgrenmouth",
+                "addressPostalCode": "50163-2735",
+                "addressState": "FL",
+                "phoneNumber": "1-916-892-2045 x293",
+                "phoneType": "Cell",
+                "customerId": 59606
+            },
+
+            // Logo used at the top of the chat window
+            "companyLogo": {
+                "width": 600,
+                "height": 149,
+                "url": "https://dhqbrvplips7x.cloudfront.net/webchat/1.0.23/company-logo-large-cea5ee47.png"
+            },
+
+            // Logo used within the chat window
+            "companyLogoSmall": {
+                "width": 149,
+                "height": 149,
+                "url": "https://dhqbrvplips7x.cloudfront.net/webchat/1.0.23/company-logo-small-9c9fe09b.png"
+            },
+
+            // Image used for agent
+            "agentAvatar": {
+                "width": 462,
+                "height": 462,
+                "url": "https://dhqbrvplips7x.cloudfront.net/webchat/1.0.23/agent-e202505f.png"
+            },
+
+            // Text displayed with chat window is displayed
+            "welcomeMessage": "Thanks for chatting.",
+
+            // CSS class applied to the chat window
+            "cssClass": "webchat-frame",
+
+            // Custom style applied to the chat window
+            "css": {
+                "width": "100%",
+                "height": "100%"
+            }
+        };
+    }
+
+    function startEmbeddedChat() {
+        createChatConfig();
+        ININ.webchat.create(chatConfig, function(err, webchat) {
+            if (err) {
+                throw err;
+            }
+
+            // Render to frame
+            webchat.renderFrame({
+                containerEl: 'chatContainer'
+            });
+
+
+
+            webchat.chatStarted = function () {
+              //Code to run when the chat is started
+            };
+
+            webchat.chatConnectedToAgent = function () {
+              //Code to run when the chat is connected to an agent
+            };
+
+            webchat.chatEnded = function () {
+              //Code to run when chat ends.
+            };
+        });
+        var RecordButton = document.getElementById("Record");
+        RecordButton.hidden = true;
+        var textDis = document.getElementById("phraseDiv");
+        textDis.style = "display: none";
+    }
+
+    function startPopupChat() {
+        createChatConfig();
+        ININ.webchat.create(chatConfig, function(err, webchat) {
+            if (err) {
+                throw err;
+            }
+            // Render to popup
+            webchat.renderPopup({
+                width: 400,
+                height: 400,
+                title: 'Chat',
+                //set newTab to true if using screen share
+                newTab: false
+            });
+
+            webchat.chatStarted = function () {
+              //Code to run when the chat is started
+            };
+
+            webchat.chatConnectedToAgent = function () {
+              //Code to run when the chat is connected to an agent
+            };
+
+            webchat.chatEnded = function () {
+              //Code to run when chat ends.
+            };
+        });
+    }
+</script>
+
+<!-- SDK USAGE -->
+<script>
+        // On document load resolve the SDK dependency
+        function Initialize(onComplete) {
+            require(["Speech.Browser.Sdk"], function(SDK) {
+                onComplete(SDK);
+            });
+        }
+        
+        // Setup the recognizer
+        function RecognizerSetup(SDK, recognitionMode, language, format, subscriptionKey) {
+            recognitionMode = SDK.RecognitionMode.Interactive;
+
+            var recognizerConfig = new SDK.RecognizerConfig(
+                new SDK.SpeechConfig(
+                    new SDK.Context(
+                        new SDK.OS(navigator.userAgent, "Browser", null),
+                        new SDK.Device("SpeechSample", "SpeechSample", "1.0.00000"))),
+                recognitionMode,
+                language, // Supported languages are specific to each recognition mode. Refer to docs.
+                format); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
+            // Alternatively use SDK.CognitiveTokenAuthentication(fetchCallback, fetchOnExpiryCallback) for token auth
+            var authentication = new SDK.CognitiveSubscriptionKeyAuthentication(subscriptionKey);
+            return SDK.CreateRecognizer(recognizerConfig, authentication);
+        }
+        // Start the recognition
+        function RecognizerStart(SDK, recognizer) {
+            recognizer.Recognize((event) => {
+                switch (event.Name) {
+                    case "SpeechStartDetectedEvent" :
+                        console.log(JSON.stringify(event.Result)); // check console for other information in result
+                        break;
+                    case "SpeechHypothesisEvent" :
+                        console.log(JSON.stringify(event.Result)); // check console for other information in result
+                        break;
+                    case "SpeechFragmentEvent" :
+                        console.log(JSON.stringify(event.Result)); // check console for other information in result
+                        break;
+                    case "SpeechEndDetectedEvent" :
+                        console.log(JSON.stringify(event.Result)); // check console for other information in result
+                        break;
+                    case "SpeechSimplePhraseEvent" :
+                        UpdateRecognizedPhrase(JSON.stringify(event.Result.DisplayText, null, 3));
+                        break;
+                    case "SpeechDetailedPhraseEvent" :
+                        UpdateRecognizedPhrase(JSON.stringify(event.Result, null, 3));
+                        break;
+                    case "RecognitionEndedEvent" :
+                        OnComplete();
+                        console.log(JSON.stringify(event)); // Debug information
+                        break;
+                    default:
+                        console.log(JSON.stringify(event)); // Debug information
+                }
+            })
+            .On(() => {
+                // The request succeeded. Nothing to do here.
+            },
+            (error) => {
+                console.error(error);
+            });
+        }
+        // Stop the Recognition.
+        function RecognizerStop(SDK, recognizer) {
+            // recognizer.AudioSource.Detach(audioNodeId) can be also used here. (audioNodeId is part of ListeningStartedEvent)
+            recognizer.AudioSource.TurnOff();
+        }
+</script>
+
+<!-- Browser Hooks -->
+<script>
+        var startBtn, phraseDiv;
+        var key, languageOptions, formatOptions, recognitionMode, inputSource;
+        var SDK;
+        var recognizer;
+        var previousSubscriptionKey;
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            startBtn = document.getElementById("Record");
+            phraseDiv = document.getElementById("phraseDiv");
+            key = document.getElementById("key");
+            languageOptions = document.getElementById("languageOptions");
+            formatOptions = document.getElementById("formatOptions");
+            inputSource = document.getElementById("inputSource");
+            recognitionMode = document.getElementById("recognitionMode");
+            startBtn.addEventListener("click", function () {
+                if (key.value == "" || key.value == "YOUR_BING_SPEECH_API_KEY") {
+                    alert("Please enter your Bing Speech subscription key!");
+                    return;
+                }
+                if (!recognizer || previousSubscriptionKey != key.value) {
+                        previousSubscriptionKey = key.value;
+                        Setup();
+                    }
+                phraseDiv.innerHTML = "";
+                RecognizerStart(SDK, recognizer);
+                startBtn.disabled = true;
+            });
+            key.addEventListener("focus", function () {
+               if (key.value == "YOUR_BING_SPEECH_API_KEY") {
+                   key.value = "";
+               }
+            });
+            key.addEventListener("focusout", function () {
+               if (key.value == "") {
+                   key.value = "YOUR_BING_SPEECH_API_KEY";
+               }
+            });
+            Initialize(function (speechSdk) {
+                SDK = speechSdk;
+                console.log(SDK)
+                startBtn.disabled = false;
+            });
+        });
+        function Setup() {
+            console.log(SDK.SpeechResultFormat[formatOptions.value]);
+            recognizer = RecognizerSetup(SDK, recognitionMode.value, languageOptions.value, SDK.SpeechResultFormat[formatOptions.value], key.value);
+        }
+        function UpdateRecognizedPhrase(json) {
+            phraseDiv.innerHTML += json + "\n";
+            console.log(phraseDiv.innerHTML);
+        }
+        function OnComplete() {
+            startBtn.disabled = false;
+            console.log('Phrase captured', phraseDiv.innerHTML);
+            const iframe = document.getElementsByTagName('iframe')[0];
+            iframe.contentWindow.postMessage({phrase: phraseDiv.innerHTML}, '*');
+        }
+
+        window.addEventListener("message", function(event){
+            console.log(arguments);
+            if (event.data.startRecording) {
+               var startBtn = document.getElementById("Record");
+                startBtn.click(); 
+            }
+
+        });
+</script>
+</body>
+</html>

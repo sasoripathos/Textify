@@ -1,0 +1,12 @@
+body {
+ /*background-image: url("http://mediad.publicbroadcasting.net/p/upr/files/styles/x_large/public/201509/forest_pic_0.jpg") !important;*/
+/*background: "black" !important; */
+}
+
+.entity-profile .banner .banner-content .information{
+	color: "red" !important;
+}
+div.gb_xe.gb_R.gb_Me.gb_Ee {
+ font-weight: bold;
+ font-size: 15px;
+}
